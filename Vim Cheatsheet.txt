@@ -1,0 +1,1147 @@
+VIM CHEATSHEET - CORE VIM COMMANDS AND KEYS
+============================================
+
+This reference covers stock Vim. Plugin mappings, GUI menu commands, and some
+specialized legacy commands vary by installation and are not included.
+
+
+1. NOTATION AND THE VIM COMMAND LANGUAGE
+-----------------------------------------
+
+Notation
+  <Esc>             Escape key
+  <CR>              Enter/Return key
+  <Tab>             Tab key
+  <BS>              Backspace key
+  <Space>           Space bar
+  <C-x>             Hold Ctrl and press x
+  <S-x>             Hold Shift and press x
+  <M-x> / <A-x>     Hold Meta/Alt and press x
+  {motion}          Any cursor motion, such as w, }, or /text<CR>
+  {count}           Optional number typed before a command
+  {char}            One character supplied to a command
+  :command<CR>      Type an Ex command and press Enter
+
+Main modes
+  Normal            Navigate and issue commands; press <Esc> to return here
+  Insert            Enter text; start with i, a, o, etc.
+  Visual            Select text; start with v, V, or <C-v>
+  Select            GUI-like selection mode; usually entered with gh
+  Command-line      Enter Ex/search commands with :, /, or ?
+  Replace           Overwrite text; start with R
+  Terminal-Job      Interact with a program in a :terminal buffer
+
+Command grammar
+  [count] operator [count] motion
+                    Most edits combine an operator and a motion
+  d2w               Delete 2 words
+  2dw               Delete 2 words
+  2d3w              Delete 6 words (counts multiply)
+  dd / yy / cc      Repeating an operator acts on whole lines
+  i / a + object    Inner object / an object including delimiters or spaces
+
+Common operators
+  d                 Delete
+  c                 Change (delete, then enter Insert mode)
+  y                 Yank (copy)
+  > / <             Indent right / left
+  =                 Reindent using Vim's indentation rules
+  gq                Format/wrap text
+  gu / gU / g~      Lowercase / uppercase / toggle case
+  !                 Filter text through an external command
+  zf                Create a fold
+
+Counts
+  5j                Move down 5 lines
+  3x                Delete 3 characters
+  4dd               Delete 4 lines
+  0                 Move to column 0 (0 starts a motion, not a count)
+
+
+2. STARTING VIM, SAVING, AND EXITING
+-------------------------------------
+
+Shell commands
+  vim file          Open a file
+  vim file1 file2   Open multiple files in the argument list
+  vim +42 file      Open at line 42
+  vim +/text file   Open at first match of "text"
+  vim -R file       Open read-only
+  vim -d a b        Open two files in diff mode
+  vim -u NONE       Start without user configuration
+  vim -N            Start in Vim-compatible (not vi-compatible) mode
+
+Inside Vim
+  :w                Write/save current file
+  :w {file}         Write to another file
+  :w!               Force write when permitted
+  :wa[ll]           Write all changed buffers
+  :up[date]         Write only if the buffer changed
+  :sav[eas] {file}  Save under a new name and edit that file
+  :q                Quit current window (fails if changes would be lost)
+  :q!               Quit current window and discard its unsaved changes
+  :qa[ll]           Quit all windows
+  :qa[ll]!          Quit all and discard unsaved changes
+  :wq               Write and quit
+  :wq!              Force write and quit
+  :x                Write only if changed, then quit
+  ZZ                Same idea as :x
+  ZQ                Quit without saving, like :q!
+  :wqa[ll]          Write all changed buffers and quit
+  :cq               Quit with a failure exit code (useful from compilers)
+  :confirm qa       Ask what to do with each modified buffer, then quit
+
+
+3. HELP AND DISCOVERY
+---------------------
+
+  :help              Open Vim help
+  :help {topic}      Open help for a topic
+  :help :write       Help for the :write command
+  :help i_CTRL-N     Help for Ctrl-N in Insert mode
+  :help v_d          Help for d in Visual mode
+  :help 'number'     Help for the 'number' option (quotes matter)
+  :help /pattern     Help for search patterns
+  :helpgrep {text}   Search all help files
+  :cnext / :cprev    Next / previous :helpgrep result
+  <C-]>              Follow the help tag under the cursor
+  <C-t>              Return from a followed help tag
+  :h index           Complete Normal-mode command index
+  :h quickref        Vim's built-in quick reference
+  :h ex-cmd-index    Complete Ex command index
+  :version           Show build, version, and compiled features
+  :scriptnames       List loaded scripts
+  :verbose map {lhs} Show a mapping and where it was last defined
+  :verbose set {opt}? Show an option and where it was last set
+
+
+4. ENTERING AND REPLACING TEXT
+------------------------------
+
+Start Insert mode
+  i                 Insert before cursor
+  I                 Insert before first non-blank character
+  a                 Append after cursor
+  A                 Append at end of line
+  o                 Open a new line below
+  O                 Open a new line above
+  gi                Insert where Insert mode last stopped
+  gI                Insert at column 1
+  :startinsert      Start Insert mode
+
+Start Replace mode
+  R                 Replace characters until <Esc>
+  gR                Virtual Replace mode (respects screen columns)
+  r{char}           Replace one character (or count characters)
+  gr{char}          Replace without changing layout
+  ~                 Toggle case and move right (behavior can depend on tildeop)
+
+Useful Insert-mode keys
+  <Esc>             Return to Normal mode
+  <C-[>             Same as <Esc>
+  <C-c>             Leave Insert mode without normal abbreviation handling
+  <C-h> / <BS>      Delete character before cursor
+  <C-w>             Delete word before cursor
+  <C-u>             Delete to start of inserted text/current line
+  <C-t>             Add one indent level
+  <C-d>             Remove one indent level
+  0<C-d>            Remove all indentation on this line
+  ^<C-d>            Remove indent for this line, restore it on the next
+  <C-j> / <C-m>     Insert a line break
+  <C-o>{command}    Execute one Normal command, then return to Insert mode
+  <C-r>{register}   Insert the contents of a register
+  <C-r><C-r>{reg}   Insert a register literally
+  <C-a>             Insert text inserted previously
+  <C-@>             Insert previous inserted text and leave Insert mode
+  <C-v>{key}        Insert the next key literally or by numeric code
+  <C-k>{digraph}    Insert a digraph (special character)
+  <C-y>             Copy character from line above
+  <C-e>             Copy character from line below
+  <C-g>u            Start a new undo block while staying in Insert mode
+
+Insert-mode completion
+  <C-n> / <C-p>     Next / previous generic completion match
+  <C-x><C-l>        Complete whole lines
+  <C-x><C-n>        Complete keywords from current file
+  <C-x><C-k>        Complete from dictionary
+  <C-x><C-t>        Complete from thesaurus
+  <C-x><C-i>        Complete from current and included files
+  <C-x><C-]>        Complete tags
+  <C-x><C-f>        Complete file names
+  <C-x><C-d>        Complete definitions/macros
+  <C-x><C-v>        Complete Vim command-line items
+  <C-x><C-u>        User-defined completion
+  <C-x><C-o>        Omni completion (filetype-aware when configured)
+  <C-x>s            Spelling suggestions
+  <C-e>             Cancel completion / scroll up in completion context
+  <C-y>             Accept selected completion
+
+
+5. BASIC CURSOR MOVEMENT
+-------------------------
+
+Characters and lines
+  h / <Left>        Left one character
+  j / <Down>        Down one display/file line
+  k / <Up>          Up one display/file line
+  l / <Right>       Right one character
+  gj / gk           Down / up one screen line when text wraps
+  g0 / g^ / gm / g$ Start / first nonblank / middle / end of screen line
+  0                 Start of line
+  ^                 First non-blank character of line
+  $                 End of line
+  g_                Last non-blank character of line
+  |                 Move to screen column [count] (default column 1)
+  + / <CR>          First non-blank of next line
+  -                 First non-blank of previous line
+  _                 First non-blank [count-1] lines down
+
+Words and WORDS
+  A word is separated by punctuation; a WORD is separated only by whitespace.
+  w / W             Start of next word / WORD
+  e / E             End of next word / WORD
+  b / B             Start of previous word / WORD
+  ge / gE           End of previous word / WORD
+
+Finding characters on the current line
+  f{char}           Move onto next {char}
+  F{char}           Move onto previous {char}
+  t{char}           Move just before next {char}
+  T{char}           Move just after previous {char}
+  ;                 Repeat latest f, F, t, or T
+  ,                 Repeat it in the opposite direction
+
+Sentences, paragraphs, sections, and blocks
+  ( / )             Previous / next sentence
+  { / }             Previous / next paragraph or blank-line block
+  [[ / ]]           Previous / next section or first-column "{"
+  [] / ][           Previous / next section end or first-column "}"
+  [{ / ]}           Unmatched { backward / unmatched } forward
+  [( / ])           Unmatched ( backward / unmatched ) forward
+  [# / ]#           Unmatched #if/#else backward / forward
+  [m / ]m           Previous / next start of a method (Java-like)
+  [M / ]M           Previous / next end of a method
+  %                 Matching (), [], {}, or preprocessor conditional
+
+File positions
+  gg                First line, or line [count]
+  G                 Last line, or line [count]
+  {count}G          Go to exact line number
+  :{number}         Go to exact line number
+  {count}%          Go to approximate percentage through file
+  H                 Top (Home) line of window
+  M                 Middle line of window
+  L                 Bottom (Last) line of window
+
+
+6. SCROLLING AND VIEWPORT CONTROL
+---------------------------------
+
+  <C-e>             Scroll window down one line (text moves up)
+  <C-y>             Scroll window up one line (text moves down)
+  <C-d>             Scroll down half a screen
+  <C-u>             Scroll up half a screen
+  <C-f>             Scroll forward one full screen
+  <C-b>             Scroll backward one full screen
+  z<CR> / zt        Put cursor line at top
+  zz / z.           Put cursor line in middle
+  z- / zb           Put cursor line at bottom
+  zs / ze           Scroll horizontally to cursor at start / end
+  zh / zl           Scroll left / right by characters
+  zH / zL           Scroll left / right by half a screen
+  <C-o> / <C-i>     Older / newer cursor position in jump list
+  g; / g,           Older / newer change position in change list
+
+
+7. TEXT OBJECTS (USE AFTER AN OPERATOR OR IN VISUAL MODE)
+---------------------------------------------------------
+
+Inner objects omit surrounding delimiters/space; "a" objects include them.
+
+  iw / aw           Inner word / a word
+  iW / aW           Inner WORD / a WORD
+  is / as           Inner sentence / a sentence
+  ip / ap           Inner paragraph / a paragraph
+  i] / a]           Inside [] / including []
+  i[ / a[           Same as i] / a]
+  i) / a)           Inside () / including ()
+  ib / ab           Same as i) / a) (b = block)
+  i> / a>           Inside <> / including <>
+  i} / a}           Inside {} / including {}
+  i{ / a{           Same as i} / a}
+  iB / aB           Same as i} / a} (B = Block)
+  i" / a"           Inside / including double quotes
+  i' / a'           Inside / including single quotes
+  i` / a`           Inside / including backticks
+  it / at           Inside / including an XML/HTML tag block
+
+Examples
+  ciw               Change current word
+  da"               Delete a quoted string, including quotes
+  yi}               Copy inside braces
+  gUap              Uppercase a paragraph
+  =i{               Reindent inside braces
+
+
+8. DELETE, CHANGE, YANK, AND PUT
+--------------------------------
+
+Delete
+  x / <Del>         Delete character under cursor
+  X                 Delete character before cursor
+  d{motion}         Delete over a motion
+  dd                Delete current line
+  D                 Delete to end of line (d$)
+  d0 / d^           Delete to start / first non-blank
+  diw / daw         Delete inner word / a word
+  dj / dk           Delete current + next / previous line
+
+Change
+  c{motion}         Change over a motion
+  cc                Change entire line, preserving indentation
+  C                 Change to end of line (c$)
+  s                 Substitute character(s), then Insert mode
+  S                 Change whole line (same as cc)
+  ciw               Change current word
+  cgn               Change next search match; use . for following matches
+
+Yank (copy)
+  y{motion}         Yank over a motion
+  yy / Y            Yank current line
+  yiw / yaw         Yank inner word / a word
+  y$                Yank to end of line
+
+Put (paste)
+  p                 Put after cursor or below current line
+  P                 Put before cursor or above current line
+  gp / gP           Put like p/P, leaving cursor after inserted text
+  ]p / [p           Put after/before and adjust line indentation
+  :put {register}   Put register below current line
+  :put! {register}  Put register above current line
+
+Join and split
+  J                 Join current line with next, inserting/adjusting spaces
+  gJ                Join without inserting/removing spaces
+  i<CR><Esc>        Split a line at cursor (from Normal mode via i)
+
+
+9. INDENTING, ALIGNING, FORMATTING, AND CASE
+---------------------------------------------
+
+  >> / <<           Indent current line right / left by shiftwidth
+  >{motion}         Indent selected text right
+  <{motion}         Indent selected text left
+  ={motion}         Reindent according to filetype rules
+  ==                Reindent current line
+  =G                Reindent through end of file
+  gg=G              Reindent entire file
+  [p / ]p           Paste and adjust indentation to destination
+  :retab            Replace whitespace according to tab settings
+  gq{motion}        Format lines to textwidth
+  gqq / gqap        Format current line / paragraph
+  gw{motion}        Format like gq but preserve cursor position
+  gu{motion}        Make lowercase
+  gU{motion}        Make uppercase
+  g~{motion}        Toggle case
+  guu / gUU / g~~   Lowercase / uppercase / toggle current line
+  ~                 Toggle case of character and advance
+  <C-a>             Add 1 (or count) to number under/after cursor
+  <C-x>             Subtract 1 (or count) from number
+  g<C-a> / g<C-x>   Sequentially add/subtract in a Visual selection
+
+
+10. UNDO, REDO, AND REPEATING CHANGES
+--------------------------------------
+
+  u                 Undo latest change
+  U                 Undo all latest changes to current line
+  <C-r>             Redo
+  :undo             Undo
+  :redo             Redo
+  .                 Repeat latest change
+  &                 Repeat latest :substitute on current line without flags
+  :&&               Repeat latest substitution with its flags
+  g&                Repeat latest substitution on all lines
+  @:                Repeat latest Ex command
+  @@                Repeat latest executed register/macro
+  :earlier 5m       Move undo state to 5 minutes earlier
+  :later 3          Move undo state 3 changes later
+  :undolist         Show undo-tree leaves
+  :wundo {file}     Write undo history to a file
+  :rundo {file}     Read undo history from a file
+  :set undofile     Enable persistent undo (usually set in vimrc)
+
+
+11. VISUAL AND SELECT MODES
+---------------------------
+
+Start/adjust selection
+  v                 Characterwise Visual mode
+  V                 Linewise Visual mode
+  <C-v>             Blockwise Visual mode
+  gv                Reselect last Visual selection
+  o                 Move cursor to other end of selection
+  O                 Move to other corner in blockwise mode
+  Esc               Leave Visual mode
+  gh / gH / g<C-h>  Character / line / block Select mode
+
+Operate on selection
+  d / x             Delete selection
+  c / s             Change selection
+  y                 Yank selection
+  p / P             Replace selection with a register
+  r{char}           Replace every selected character with {char}
+  ~ / u / U         Toggle / lower / uppercase selection
+  > / <             Indent right / left (selection normally ends)
+  >gv / <gv         Indent and immediately reselect
+  =                 Reindent selection
+  gq / gw           Format selection
+  J / gJ            Join selected lines with / without spacing
+  :                 Start an Ex command using range '<,'>
+
+Blockwise insertion
+  I{text}<Esc>      Insert text at left edge of every selected line
+  A{text}<Esc>      Append text at right edge of every selected line
+  c{text}<Esc>      Replace selected block on every selected line
+
+
+12. SEARCHING
+-------------
+
+  /{pattern}<CR>    Search forward
+  ?{pattern}<CR>    Search backward
+  n                 Repeat search in same direction
+  N                 Repeat search in opposite direction
+  *                 Search forward for whole word under cursor
+  #                 Search backward for whole word under cursor
+  g* / g#           Search forward/backward for cursor text, not whole-word
+  gd                Go to local declaration of word under cursor
+  gD                Go to global declaration
+  1gd               Go to first local declaration
+  <C-o>             Jump back after following a result
+  q/ / q?           Open editable forward/backward search history window
+  :noh[lsearch]     Temporarily clear search highlighting
+  :set hlsearch     Highlight matches
+  :set incsearch    Show matches while typing
+  :set ignorecase   Ignore case in searches
+  :set smartcase    With ignorecase, uppercase makes a search case-sensitive
+
+Search command-line keys
+  <C-r><C-w>        Insert word under cursor into search/command line
+  <C-r><C-a>        Insert WORD under cursor
+  <C-r>{register}   Insert register contents
+  <Up> / <Down>     Older / newer history item
+  <C-f>             Open the command-line window
+  q:                Open Ex command history window from Normal mode
+
+Useful pattern atoms (Vim regex differs from PCRE)
+  .                 Any character
+  ^ / $             Start / end of line
+  \< / \>           Start / end of word
+  \s / \S           Whitespace / non-whitespace
+  \d / \D           Digit / non-digit
+  \w / \W           Word character / non-word character
+  [abc] / [^abc]   One listed / one unlisted character
+  *                 Zero or more of previous atom
+  \+                One or more
+  \=                Zero or one
+  \{n,m}            Between n and m repetitions
+  \( ... \)         Capture group
+  \1                First captured group
+  \|                Alternation
+  \zs / \ze         Set start / end of reported match
+  \c / \C           Force case-insensitive / case-sensitive
+  \V                Very nomagic: most following characters are literal
+  \v                Very magic: regex punctuation needs less escaping
+
+
+13. SUBSTITUTE, GLOBAL, AND SORT
+--------------------------------
+
+Substitute syntax
+  :[range]s/{pattern}/{replacement}/[flags]
+
+Examples
+  :s/old/new/       Replace first match on current line
+  :s/old/new/g      Replace every match on current line
+  :%s/old/new/g     Replace every match in entire file
+  :%s/old/new/gc    Replace all, asking for confirmation
+  :5,20s/a/b/g      Replace on lines 5 through 20
+  :'<,'>s/a/b/g     Replace in last Visual selection
+  :%s/\s\+$//e      Remove trailing whitespace; suppress no-match error
+  :%s//new/g        Replace the most recently searched pattern
+  :s/foo/bar/I      Force case-sensitive matching
+  :s/foo/bar/i      Force case-insensitive matching
+
+Replacement items
+  &                 Entire matched text
+  \0                Entire matched text
+  \1 ... \9         Captured groups
+  \r                Line break
+  \n                NUL in replacement (use \r for a newline)
+  \t                Tab
+  \=expression      Evaluate a Vim expression as replacement
+  ~                 Previous replacement string
+
+Confirmation keys
+  y                 Replace this match
+  n                 Skip this match
+  a                 Replace this and all remaining matches
+  q / <Esc>         Quit substitution
+  l                 Replace this match, then quit
+  <C-e> / <C-y>     Scroll down / up
+
+Global commands
+  :g/{pattern}/{cmd}    Run command on every matching line
+  :g!/{pattern}/{cmd}   Run command on every nonmatching line
+  :v/{pattern}/{cmd}    Same as :g! (inverse global)
+  :g/TODO/p             Print lines containing TODO
+  :g/^$/d               Delete blank lines
+  :v/keep/d             Delete lines not containing "keep"
+  :g/pat/normal! A;     Append ; to matching lines
+
+Sorting and uniqueness
+  :sort             Sort lines in range
+  :sort!            Reverse sort
+  :sort n           Numeric sort
+  :sort f           Floating-point numeric sort
+  :sort i           Case-insensitive sort
+  :sort u           Sort and keep unique lines
+  :sort /regex/     Sort using text matching regex as key
+
+
+14. REGISTERS AND THE CLIPBOARD
+-------------------------------
+
+Prefix a delete, yank, change, or put with "{register}.
+
+  :registers        Display register contents
+  :reg {names}      Display selected registers
+  "ayy              Yank a line into register a
+  "ap               Put register a
+  "Ayy              Append a line to register a (uppercase appends)
+  "0p               Put last yank (unaffected by ordinary deletes)
+  "1p               Put most recent linewise delete/change
+  "2p ... "9p       Older linewise deletes/changes
+  "-p               Put latest small (less than one line) delete
+  "_d{motion}       Delete into black-hole register; preserve normal registers
+  "+y / "+p         Yank to / put from system clipboard
+  "*y / "*p         Yank to / put from primary selection (platform-dependent)
+  "=expr<CR>p       Evaluate expression and put its result
+
+Special registers
+  ""                Unnamed register (latest delete/change/yank)
+  "0                Latest yank
+  "1 through "9     Delete/change history
+  "-                Small-delete register
+  "a through "z     Named registers
+  "A through "Z     Append to named registers
+  "_                Black-hole register
+  ".                Last inserted text
+  ":                Last Ex command
+  "/                Last search pattern
+  "%                Current file name
+  "#                Alternate file name
+  "=                Expression register
+  "+ / "*           System clipboard / primary selection
+
+Clipboard configuration
+  :set clipboard=unnamedplus
+                    Make ordinary yanks/deletes use the + clipboard by default
+
+
+15. MARKS, JUMPS, AND CHANGE LOCATIONS
+--------------------------------------
+
+  m{a-z}            Set local mark (valid in current file)
+  m{A-Z}            Set global mark (can jump between files)
+  `{mark}           Jump to exact position of mark
+  '{mark}           Jump to first non-blank on mark's line
+  `` / ''           Jump to exact / line position before latest jump
+  `. / '.           Jump to exact / line position of latest change
+  `^ / '^           Position where Insert mode last stopped
+  `[ / `]           Start / end of most recently changed or yanked text
+  `< / `>           Start / end of latest Visual selection
+  :marks            List marks
+  :delmarks a-c     Delete marks a through c
+  :delmarks!        Delete all lowercase local marks
+  <C-o> / <C-i>     Older / newer entry in jump list
+  :jumps            Display jump list
+  g; / g,           Older / newer entry in change list
+  :changes          Display change list
+
+
+16. MACROS AND AUTOMATION
+-------------------------
+
+  q{register}       Start recording keystrokes into register
+  q                 Stop recording
+  @{register}       Execute a register as Normal-mode commands
+  @@                Repeat the last executed register
+  10@a              Execute macro a ten times
+  @:                Execute latest Ex command
+  @/                Execute latest search register as commands (rarely useful)
+  :normal {keys}    Execute Normal-mode keys on current/ranged lines
+  :normal! {keys}   Execute built-in Normal keys, ignoring mappings
+  :%normal! A;      Append ; to every line
+
+Editing a macro
+  "ap               Paste macro a into the buffer
+  {edit text}       Edit it normally
+  "ayy              Yank it back into register a (line ending may matter)
+
+
+17. BUFFERS AND THE ARGUMENT LIST
+---------------------------------
+
+A buffer is an in-memory file; a window is a view onto a buffer.
+
+Buffers
+  :edit {file}      Edit file in current window
+  :edit!            Reload current file, discarding unsaved buffer changes
+  :enew             Open a new unnamed buffer
+  :ls / :buffers    List buffers
+  :buffer {name/#}  Switch to buffer by name or number
+  :bnext / :bprev   Next / previous buffer
+  :bfirst / :blast  First / last buffer
+  :b# / <C-^>       Alternate buffer
+  :bdelete          Unload buffer and remove it from buffer list
+  :bwipeout         Completely remove buffer and related state
+  :ball             Open a window for every buffer
+  :set hidden       Permit leaving modified buffers without saving immediately
+
+Argument list
+  :args             Show current argument list
+  :args {files}     Replace argument list
+  :argadd {files}   Add files to argument list
+  :argdelete {file} Remove files from argument list
+  :next / :previous Next / previous argument
+  :first / :last    First / last argument
+  :argument {n}     Go to argument n
+  :argdo {cmd}      Run command in every argument buffer
+  :argdo update     Save every changed file in argument list
+
+
+18. WINDOWS (SPLITS)
+---------------------
+
+Create/close splits
+  :split [file]     Horizontal split
+  :vsplit [file]    Vertical split
+  :new [file]       Horizontal split with new buffer/file
+  :vnew [file]      Vertical split with new buffer/file
+  <C-w>s            Split current window horizontally
+  <C-w>v            Split current window vertically
+  <C-w>n            New horizontal window
+  <C-w>q / :close   Close current window
+  <C-w>o / :only    Close all other windows
+
+Move between windows
+  <C-w>h/j/k/l      Move to left/below/above/right window
+  <C-w><Left/Down/Up/Right>
+                    Move in arrow direction
+  <C-w>w            Cycle to next window
+  <C-w>W            Cycle to previous window
+  <C-w>t / <C-w>b   Top-left / bottom-right window
+  <C-w>p            Previously accessed window
+
+Move and rotate windows
+  <C-w>H/J/K/L      Move current split to far left/bottom/top/right
+  <C-w>r / <C-w>R   Rotate windows down/right or up/left
+  <C-w>x            Exchange current window with next
+  <C-w>T            Move current window to a new tab
+
+Resize windows
+  <C-w>=            Make sizes equal
+  <C-w>_            Maximize height
+  <C-w>|            Maximize width
+  <C-w>+ / <C-w>-   Increase / decrease height
+  <C-w>> / <C-w><   Increase / decrease width
+  :resize {n}       Set height to n rows
+  :vertical resize {n}
+                    Set width to n columns
+
+Apply commands
+  :windo {cmd}      Run command in every window in current tab
+  :bufdo {cmd}      Run command in every listed buffer
+  :tabdo {cmd}      Run command in every tab page
+
+
+19. TAB PAGES
+-------------
+
+A tab page is a layout of windows, not a single file.
+
+  :tabnew [file]    Open new tab page
+  :tabedit {file}   Edit file in new tab
+  :tabclose         Close current tab page
+  :tabonly          Close other tab pages
+  :tabs             List tab pages and their windows
+  gt / :tabnext     Next tab
+  gT / :tabprevious Previous tab
+  {count}gt         Go to tab page {count}
+  :tabfirst         First tab
+  :tablast          Last tab
+  :tabmove {n}      Move tab after tab n (0 means beginning)
+  :tab split        Open current buffer in a new tab
+
+
+20. FILES, DIRECTORIES, AND EXTERNAL COMMANDS
+---------------------------------------------
+
+  :pwd              Print working directory
+  :cd {dir}         Change global working directory
+  :lcd {dir}        Change working directory for current window
+  :tcd {dir}        Change working directory for current tab
+  :file             Show current file information
+  :file {name}      Change current buffer's file name
+  :read {file}      Insert file below current line
+  :0read {file}     Insert file before first line
+  :write {file}     Write range/buffer to file
+  :!{command}       Run external shell command
+  :shell            Start an interactive shell; exit it to return
+  :read !{command}  Insert command output below current line
+  :write !{command} Send lines to command's standard input
+  :%!{command}      Filter whole buffer through external command
+  !{motion}{command}
+                    Filter motion-selected text through command
+  :make [args]      Run configured make program and populate quickfix
+  :grep {pattern} {files}
+                    Run configured grep and populate quickfix
+  :find {file}      Find a file using the 'path' option
+  gf                Edit file name under cursor
+  <C-w>f            Open file name under cursor in split
+
+
+21. EX COMMAND-LINE BASICS, RANGES, AND ADDRESSES
+-------------------------------------------------
+
+Addresses
+  .                 Current line
+  $                 Last line
+  %                 Entire file (equivalent to 1,$)
+  5                 Line 5
+  'a                Line containing mark a
+  '<,'>             Last Visual selection
+  /pattern/         Next line matching pattern
+  ?pattern?         Previous line matching pattern
+  .+3 / $-2         Address with positive/negative offset
+  5,10              Inclusive range from line 5 through 10
+  ;                 Range separator that sets current line before second address
+
+Useful ranged commands
+  :[range]print     Print lines
+  :[range]number    Print lines with line numbers
+  :[range]delete [reg]
+                    Delete lines, optionally into register
+  :[range]yank [reg]
+                    Yank lines
+  :[range]copy {address}
+                    Copy lines below address (:t is shorthand)
+  :[range]move {address}
+                    Move lines below address (:m is shorthand)
+  :[range]join      Join lines
+  :[range]> / :<    Shift indentation
+  :[range]normal! {keys}
+                    Apply Normal keys to every line
+
+Examples
+  :5,10d            Delete lines 5-10
+  :.,$y a           Yank current line through end into register a
+  :10t.             Copy line 10 below current line
+  :'<,'>m0          Move Visual selection to top of file
+  :-1,+1p           Print previous, current, and next lines
+
+Command modifiers
+  :silent {cmd}     Suppress normal messages
+  :silent! {cmd}    Suppress messages and errors
+  :keepjumps {cmd}  Avoid changing jump list
+  :keeppatterns {cmd}
+                    Avoid changing last search/substitute patterns
+  :noautocmd {cmd}  Do not trigger autocommands
+  :vertical {cmd}   Use vertical split where applicable
+  :aboveleft / :belowright {cmd}
+                    Control where a split opens
+
+Command-line editing
+  <Left>/<Right>    Move cursor
+  <C-b>/<C-e>       Move to beginning/end
+  <C-w>             Delete previous word
+  <C-u>             Delete to beginning
+  <C-r>{register}   Insert register contents
+  <Tab>/<S-Tab>     Complete / previous completion
+  <C-d>             List possible completions
+  q: / q/ / q?      Editable Ex / forward-search / backward-search history
+
+
+22. QUICKFIX AND LOCATION LISTS
+-------------------------------
+
+Quickfix is global; each window can have its own location list.
+
+  :copen / :cclose  Open / close quickfix window
+  :cwindow          Open quickfix only if entries exist
+  :cnext / :cprev   Next / previous quickfix entry
+  :cfirst / :clast  First / last quickfix entry
+  :cnfile / :cpfile Next / previous file represented in quickfix
+  :colder / :cnewer Older / newer quickfix list
+  :clist            List quickfix entries
+  :cexpr {expr}     Create quickfix list from expression
+  :cfile {file}     Read quickfix entries from file
+  :vimgrep /pat/gj **/*.txt
+                    Search files and populate quickfix (j avoids jumping)
+  :vimgrepadd       Add matches to current quickfix list
+
+Location-list equivalents
+  :lopen / :lclose  Open / close current window's location list
+  :lnext / :lprev   Next / previous location entry
+  :lfirst / :llast  First / last location entry
+  :lolder / :lnewer Older / newer location list
+  :llist            List location entries
+  :lvimgrep         Search and populate location list
+
+Inside list windows
+  <CR>              Jump to selected entry
+  :cc {n} / :ll {n} Jump to quickfix / location entry n
+
+
+23. TAGS, IDENTIFIERS, AND INCLUDE SEARCHES
+-------------------------------------------
+
+Requires a tags file or suitable include/path configuration.
+
+  <C-]>             Jump to tag under cursor
+  g<C-]>            List matching tags, then choose
+  :tag {name}       Jump to tag
+  :tselect {name}   List matching tags
+  :tjump {name}     Jump if unique; otherwise list matches
+  :tnext / :tprev   Next / previous matching tag
+  :tfirst / :tlast  First / last matching tag
+  <C-t> / :pop      Older entry in tag stack
+  :tags             Display tag stack
+  [<C-d> / ]<C-d>   Previous / next definition of identifier
+  [<C-i> / ]<C-i>   Previous / next occurrence in included files
+  [I / ]I           List occurrences in included files
+  [D / ]D           List definitions in included files
+  K                 Run 'keywordprg' for word under cursor (often man/help)
+
+
+24. FOLDS
+---------
+
+Fold behavior depends on 'foldmethod' (manual, indent, syntax, expr, marker,
+or diff). Manual-fold commands are most predictable with foldmethod=manual.
+
+  zf{motion}        Create manual fold
+  zF                Create fold for [count] lines
+  zo / zO           Open one fold / recursively open folds under cursor
+  zc / zC           Close one fold / recursively close folds under cursor
+  za / zA           Toggle one fold / recursively toggle
+  zv                Open enough folds to reveal cursor
+  zd / zD           Delete one manual fold / nested folds under cursor
+  zE                Eliminate all manual folds in window
+  zj / zk           Move to next / previous fold
+  [z / ]z           Move to start / end of current open fold
+  zm / zM           Close one fold level / close all folds
+  zr / zR           Open one fold level / open all folds
+  zn / zN / zi      Disable / enable / toggle folding
+  :set foldmethod=indent
+                    Fold based on indentation
+  :set foldlevel=99 Start with most folds open
+
+
+25. SPELL CHECKING
+-------------------
+
+  :set spell        Enable spelling
+  :set nospell      Disable spelling
+  ]s / [s           Next / previous misspelled word
+  ]S / [S           Next / previous bad word only (skip rare words)
+  z=                Show correction suggestions
+  1z=               Use first suggestion
+  zg / zG           Add word to persistent / temporary good-word list
+  zw / zW           Mark word persistently / temporarily as wrong
+  zug / zuG         Undo zg / zG
+  zuw / zuW         Undo zw / zW
+  :set spelllang=en_us
+                    Select spelling language(s)
+
+
+26. DIFF MODE
+-------------
+
+Start with vim -d file1 file2 or use :diffthis in existing splits.
+
+  :diffthis         Add current window to diff set
+  :diffoff          Remove current window from diff mode
+  :diffoff!         Turn diff off in all windows of current tab
+  :diffupdate       Recompute differences
+  ]c / [c           Next / previous change
+  do / :diffget     Obtain change from other diff buffer
+  dp / :diffput     Put change into other diff buffer
+  :diffget {buf}    Obtain from specified buffer
+  :diffput {buf}    Put into specified buffer
+  :windo diffthis   Diff all windows in current tab
+
+
+27. TERMINAL MODE (WHEN VIM HAS +terminal)
+------------------------------------------
+
+  :terminal [cmd]   Open terminal; optionally run a command
+  :botright new | terminal
+                    Open terminal in a bottom split
+  <C-w>N            Enter Terminal-Normal mode
+  <C-\><C-n>        Enter Terminal-Normal mode (portable default)
+  i / a             Return from Terminal-Normal to Terminal-Job mode
+  <C-w>"{register}  Paste register into terminal
+  :term ++curwin {cmd}
+                    Run terminal command in current window
+
+In Terminal-Normal mode, use ordinary motions/yanks, then press i to resume the
+job. Closing a terminal with a running job may require confirmation or :q!.
+
+
+28. MAPPINGS, ABBREVIATIONS, AND CONFIGURATION
+----------------------------------------------
+
+The primary config file is typically ~/.vimrc (Unix/macOS) or _vimrc (Windows).
+Use :echo $MYVIMRC to see the active user vimrc path.
+
+Mappings
+  :map              List Normal/Visual/Operator-pending mappings
+  :nmap             List Normal-mode mappings
+  :imap             List Insert-mode mappings
+  :vmap             List Visual/Select mappings
+  :omap             List Operator-pending mappings
+  :cmap             List command-line mappings
+  :tmap             List terminal mappings
+  :noremap {a} {b}  Non-recursive multi-mode mapping
+  :nnoremap {a} {b} Non-recursive Normal mapping
+  :inoremap {a} {b} Non-recursive Insert mapping
+  :vnoremap {a} {b} Non-recursive Visual mapping
+  :onoremap {a} {b} Non-recursive operator-pending mapping
+  :cnoremap {a} {b} Non-recursive command-line mapping
+  :tnoremap {a} {b} Non-recursive terminal mapping
+  :unmap {lhs}      Remove mapping
+  :nunmap / :iunmap / :vunmap
+                    Remove mode-specific mapping
+  <Leader>          Value of mapleader in a mapping (default is backslash)
+  <LocalLeader>     Filetype/plugin-local leader
+  <Cmd>{cmd}<CR>    Run command from mapping without switching to Cmd-line mode
+  <Plug>(name)      Conventional internal/plugin mapping target
+
+Abbreviations
+  :iabbrev teh the  Expand "teh" to "the" in Insert mode
+  :cabbrev ...      Command-line abbreviation
+  :abbreviate       List abbreviations
+  :iunabbrev {lhs}  Remove Insert abbreviation
+
+Inspect/change options
+  :set              Show options changed from defaults
+  :set all          Show all options
+  :set {option}?    Show one option
+  :set number       Enable Boolean option
+  :set nonumber     Disable Boolean option
+  :set number!      Toggle Boolean option
+  :set option=value Assign option
+  :set option+=x    Add to option
+  :set option-=x    Remove from option
+  :set option&      Reset option to default
+  :setlocal ...     Set only for current buffer/window
+  :setglobal ...    Set global default
+
+Common options
+  :set number relativenumber
+                    Absolute current line + relative surrounding lines
+  :set cursorline   Highlight current screen line
+  :set wrap         Wrap long displayed lines
+  :set nowrap       Horizontally scroll long lines
+  :set linebreak    Wrap at convenient characters, not mid-word
+  :set list         Display tabs/trailing spaces using listchars
+  :set tabstop=4    Display a tab as 4 columns
+  :set shiftwidth=4 Indentation width
+  :set softtabstop=4
+                    Editing width for tabs/spaces
+  :set expandtab    Insert spaces instead of tab characters
+  :set noexpandtab  Insert real tab characters
+  :set autoindent   Copy indentation from current line
+  :set smartindent  Basic smart indentation for code
+  :filetype plugin indent on
+                    Enable filetype detection, plugins, and indentation
+  :syntax on        Enable syntax highlighting
+  :set textwidth=80 Auto-wrap inserted text near column 80
+  :set colorcolumn=81
+                    Highlight column 81
+  :set scrolloff=5  Keep 5 screen lines around cursor
+  :set sidescrolloff=5
+                    Keep horizontal context around cursor
+  :set wildmenu     Enhanced command-line completion
+  :set mouse=a      Enable mouse in all modes
+  :set backup       Keep backup files
+  :set undofile     Keep undo history across sessions
+  :set ignorecase smartcase
+                    Convenient case behavior for search
+  :set incsearch hlsearch
+                    Incremental search and match highlighting
+
+Example minimal vimrc
+  set nocompatible
+  filetype plugin indent on
+  syntax on
+  set number
+  set ignorecase smartcase
+  set incsearch hlsearch
+  set expandtab shiftwidth=4 softtabstop=4
+  set hidden
+  set undofile
+  let mapleader = " "
+  nnoremap <Leader>w <Cmd>write<CR>
+
+Reload configuration
+  :source $MYVIMRC  Reload vimrc
+  :edit $MYVIMRC    Edit vimrc
+
+
+29. AUTOCOMMANDS AND USER COMMANDS (CONFIGURATION)
+--------------------------------------------------
+
+Autocommands react to events. Put related rules in an augroup and clear that
+group first so sourcing vimrc repeatedly does not duplicate rules.
+
+  augroup my_group
+    autocmd!
+    autocmd BufWritePre * %s/\s\+$//e
+  augroup END
+
+  :autocmd          List autocommands
+  :autocmd {event}  List autocommands for event
+  :doautocmd {event}
+                    Trigger an event manually
+  :noautocmd {cmd}  Execute command without autocommands
+
+User command example
+  command! W write
+  command! -nargs=1 Grep vimgrep /<args>/gj **/*
+
+See :help autocmd-events and :help :command for the full event and attribute
+lists.
+
+
+30. SESSIONS, VIEWS, AND PERSISTENCE
+------------------------------------
+
+  :mksession[!] {file}
+                    Save windows, tabs, buffers, and related state
+  :source {file}    Restore a saved session
+  :mkview[!] [n]    Save current window view (folds/cursor/options)
+  :loadview [n]     Restore saved view
+  :set viminfo?     Inspect Vim history/register persistence settings
+  :wviminfo[!] [file]
+                    Write viminfo manually
+  :rviminfo[!] [file]
+                    Read viminfo manually
+
+
+31. SPECIAL CHARACTER ENTRY AND KEY CODES
+-----------------------------------------
+
+  ga                Show code/value of character under cursor
+  g8                Show UTF-8 bytes of character under cursor
+  :ascii            Show character code under cursor
+  :digraphs         List available digraphs
+  <C-k>{c1}{c2}     Insert a digraph in Insert mode
+  <C-v>065          Insert character by decimal code
+  <C-v>o101         Insert character by octal code
+  <C-v>x41          Insert character by 2-digit hex code
+  <C-v>u00e9        Insert Unicode by 4-digit hex code
+  <C-v>U0001f600    Insert Unicode by 8-digit hex code
+
+
+32. USEFUL NORMAL-MODE "g" AND "z" COMMANDS
+---------------------------------------------
+
+  gf / gF           Edit file under cursor / file and line number
+  gx                Open URI/file under cursor using configured handler
+  ga                Display character code
+  gd / gD           Local / global declaration
+  gi                Resume Insert mode at last insertion position
+  gv                Reselect last Visual selection
+  g&                Repeat last substitution over entire file
+  g0 / g$           Start / end of wrapped screen line
+  ge / gE           End of previous word / WORD
+  g_                Last non-blank character
+  g; / g,           Older / newer change
+  g<C-g>            Show detailed cursor/word/byte statistics
+  z=                Spelling suggestions
+  zz                Center cursor line
+  zt / zb           Cursor line at top / bottom
+  zR / zM           Open / close all folds
+
+
+33. HIGH-VALUE WORKFLOWS
+-------------------------
+
+Change every occurrence interactively
+  /old<CR>          Find first occurrence
+  cgnnew<Esc>       Change it
+  .                 Repeat at each next occurrence (or n to skip)
+
+Apply one edit to many lines
+  <C-v>             Select a vertical block
+  I{text}<Esc>      Insert at the start of every selected line
+
+Run a Normal edit on matching lines
+  :g/pattern/normal! {keys}
+
+Edit several files safely
+  :args **/*.txt
+  :argdo %s/old/new/ge | update
+
+Copy a section to another split
+  V{motion}"ay      Select lines and yank to register a
+  <C-w>w            Move to the other split
+  "ap               Paste register a
+
+Recover from a mistaken paste/delete
+  "0p               Paste the latest yank instead of latest delete
+  :registers        Inspect what Vim still has in registers
+
+Use help precisely
+  :h dd             Normal-mode dd
+  :h v_d            Visual-mode d
+  :h i_CTRL-W       Insert-mode Ctrl-W
+  :h :delete        Ex :delete
+  :h 'expandtab'    expandtab option
+
+
+34. QUICK SURVIVAL CARD
+-----------------------
+
+  <Esc>             Return to Normal mode
+  i / a             Insert before / after cursor
+  :w<CR>            Save
+  :q<CR>            Quit
+  :q!<CR>           Quit without saving
+  :wq<CR>           Save and quit
+  h j k l           Left, down, up, right
+  w / b             Next / previous word
+  0 / ^ / $         Start / first nonblank / end of line
+  gg / G            Top / bottom of file
+  x                 Delete character
+  dd / yy           Delete / copy line
+  p / P             Paste after/before
+  u / <C-r>         Undo / redo
+  .                 Repeat last change
+  /text<CR>         Search forward
+  n / N             Next / previous search match
+  v / V / <C-v>     Character / line / block selection
+  :help {topic}<CR> Get authoritative built-in help
+
+
+FINAL NOTE
+----------
+
+Vim is compositional: learning motions and text objects multiplies the power of
+every operator. For exhaustive details for your exact Vim build, use :h index,
+:h quickref, and :h ex-cmd-index. Those built-in manuals are the definitive
+reference for commands affected by version, platform, feature flags, or options.
