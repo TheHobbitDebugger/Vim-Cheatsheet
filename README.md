@@ -1,1 +1,1 @@
-Comprehensive Vim Cheatsheet commands list
+Comprehensive Vim Cheatsheet commands list and cheatsheet for fast consultation
