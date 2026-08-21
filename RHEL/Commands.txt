@@ -71,6 +71,8 @@ rsync -avz <src> <dst> — Efficient file synchronization and copy.
 Permissions & Ownership
 
 chmod 644 <file> — Change file permissions.
+chmod u+s <file> — Set the setuid bit (run with file owner’s permissions).
+chmod g+s <dir> — Set the setgid bit (new files inherit the directory group).
 chmod -R 755 <dir> — Recursively set directory permissions.
 chown user:group <file> — Change file owner and group.
 setfacl -m u:username:rwx <file> — Add POSIX ACL for a user.
@@ -232,6 +234,7 @@ python3 -m venv env — Create Python virtual environment.
 Miscellaneous Useful Commands
 
 echo $PATH — Show PATH environment variable.
+pwd — Print the current working directory.
 env — List environment variables.
 export VAR=value — Set environment variable for session.
 alias ll='ls -lah' — Create a shell alias.
