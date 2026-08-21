@@ -1,0 +1,244 @@
+System Information
+
+uname -a — Show kernel name, version, and machine info.
+hostnamectl — Display or change the system hostname and related settings.
+cat /etc/os-release — Show OS distribution and version info.
+arch — Display machine architecture (x86_64, aarch64, etc.).
+uptime — Show system uptime and load averages.
+dmesg — Print kernel ring buffer (boot and kernel messages).
+lsb_release -a — Print distribution-specific information (if available).
+
+
+Boot & Services
+
+systemctl status <service> — Show status of a systemd service.
+systemctl start <service> — Start a service.
+systemctl stop <service> — Stop a service.
+systemctl restart <service> — Restart a service.
+systemctl enable <service> — Enable a service to start at boot.
+systemctl disable <service> — Disable a service at boot.
+systemctl is-enabled <service> — Check if enabled.
+systemctl list-units --type=service — List active services.
+journalctl -u <service> — Show journal logs for a service.
+journalctl -b — Show logs since last boot.
+grubby --info=ALL — Show kernel entries and bootloader info (RHEL/CentOS).
+
+
+Package Management (DNF/YUM/RPM)
+
+dnf install <pkg> — Install a package (RHEL 8+ preferred).
+yum install <pkg> — Install a package (older RHEL).
+dnf update — Update all packages.
+dnf upgrade — Upgrade packages (alias to update behavior).
+dnf remove <pkg> — Remove a package.
+dnf list installed — List installed packages.
+rpm -qa — Query all installed RPMs.
+rpm -qi <pkg> — Show package info for an installed RPM.
+rpm -Uvh <file.rpm> — Install or upgrade from an RPM file.
+dnf repolist — List enabled repositories.
+subscription-manager status — Show Red Hat subscription status.
+subscription-manager repos --list — List available RH repos.
+
+
+Users & Groups
+
+useradd <user> — Create a new user account.
+usermod -aG <group> <user> — Add user to supplementary group.
+passwd <user> — Set or change a user's password.
+userdel -r <user> — Delete a user and their home directory.
+groupadd <group> — Create a new group.
+id <user> — Show UID, GID and group memberships.
+getent passwd <user> — Get user entry from passwd/nss.
+chage -l <user> — Show password aging information.
+
+
+File & Directory Management
+
+ls -lah — List files with human-readable sizes, hidden files.
+cp -a <src> <dst> — Copy files/directories preserving attributes.
+mv <src> <dst> — Move or rename files/directories.
+rm -rf <path> — Remove files or directories recursively.
+find <path> -name "<pattern>" — Find files by name.
+locate <name> — Fast file search using updatedb database.
+updatedb — Update locate database.
+stat <file> — Show file detailed metadata.
+file <file> — Determine file type.
+tar -czf archive.tar.gz <files> — Create gzip-compressed tar archive.
+tar -xzf archive.tar.gz — Extract gzip-compressed tar archive.
+rsync -avz <src> <dst> — Efficient file synchronization and copy.
+
+
+Permissions & Ownership
+
+chmod 644 <file> — Change file permissions.
+chmod -R 755 <dir> — Recursively set directory permissions.
+chown user:group <file> — Change file owner and group.
+setfacl -m u:username:rwx <file> — Add POSIX ACL for a user.
+getfacl <file> — Display ACLs for a file.
+umask — View or set default file creation permissions.
+
+
+Process & Job Management
+
+ps aux — List all running processes.
+top — Interactive real-time process viewer.
+htop — Improved interactive process viewer (if installed).
+pgrep <name> — Find process IDs by name.
+pkill <name> — Send signal to processes by name.
+kill <pid> — Send SIGTERM to a process.
+kill -9 <pid> — Send SIGKILL to forcibly terminate a process.
+nice -n <n> <command> — Start process with adjusted niceness.
+renice -n <n> -p <pid> — Change priority of running process.
+systemd-cgtop — Show control group resource usage.
+
+
+Storage & Filesystems
+
+lsblk — List block devices.
+blkid — Show block device attributes (UUID, TYPE).
+fdisk -l — List disk partitions.
+parted /dev/sdX print — Print partition layout with parted.
+mkfs.ext4 /dev/sdXn — Create ext4 filesystem on a partition.
+mount /dev/sdXn /mnt — Mount a device to a mount point.
+umount /mnt — Unmount a mounted filesystem.
+df -h — Show disk usage by filesystem (human readable).
+du -sh <path> — Show directory size summary.
+tune2fs -l /dev/sdXn — Show ext* filesystem info.
+fuser -m /mountpoint — Show processes using a filesystem.
+mount -o remount,ro /mountpoint — Remount filesystem read-only.
+
+
+LVM & Disk Management
+
+pvcreate /dev/sdX — Initialize a physical volume.
+pvdisplay — Show PV details.
+vgcreate vgname /dev/sdX — Create a volume group.
+vgdisplay — Show VG details.
+lvcreate -n lvname -L 10G vgname — Create a logical volume.
+lvdisplay — Show LV details.
+lvextend -L +5G /dev/vgname/lvname — Extend LV size.
+resize2fs /dev/vgname/lvname — Resize filesystem after LV resize (ext).
+pvs, vgs, lvs — Short listing commands for LVM objects.
+
+
+Networking
+
+ip addr show — Show network interfaces and addresses.
+ip link set dev <if> up/down — Enable or disable an interface.
+ip route — Show routing table.
+nmcli connection show — List NetworkManager connections.
+nmcli device status — Show NetworkManager device states.
+nmcli connection up <name> — Bring up a connection.
+nmcli connection down <name> — Bring down a connection.
+ss -tuln — Show listening sockets (tcp/udp).
+netstat -tulpn — Network connections and listening ports (if installed).
+ping <host> — Test ICMP reachability.
+traceroute <host> — Trace route to a host.
+curl -I <url> — Fetch HTTP headers.
+wget <url> — Download files from the web.
+ethtool <interface> — Show or change NIC settings.
+
+
+Firewall & Security
+
+firewall-cmd --state — Show firewalld state.
+firewall-cmd --list-all — List current firewalld config (default zone).
+firewall-cmd --add-service=<svc> --permanent — Open service in firewalld permanently.
+firewall-cmd --reload — Reload firewalld configuration.
+iptables -L -n -v — Show legacy iptables rules.
+sshd -T — Show sshd configuration as parsed.
+ssh root@host — Connect to remote host via SSH.
+ssh-keygen — Generate SSH key pairs.
+ssh-copy-id user@host — Install public key into remote authorized_keys.
+
+
+SELinux & Auditing
+
+sestatus — Show SELinux status and mode.
+getenforce — Show current SELinux mode (Enforcing/Permissive/Disabled).
+setenforce 0 — Temporarily set SELinux to Permissive.
+semanage port -l — List SELinux port contexts (policy management).
+auditctl -l — List current audit rules.
+ausearch -m avc — Search audit logs for SELinux AVC denials.
+aureport --summary — Summary report of audit logs.
+restorecon -v <file> — Restore SELinux context on a file.
+
+
+Logging & Monitoring
+
+journalctl -xe — Show recent journal logs with explanation.
+tail -f /var/log/messages — Follow system messages in real time.
+tail -f /var/log/secure — Follow auth and security logs.
+logrotate -d /etc/logrotate.conf — Debug logrotate configuration.
+sar -u 1 3 — Report CPU activity (sysstat package).
+vmstat 1 5 — Report virtual memory, processes, CPU activity.
+iostat -x 1 3 — I/O statistics by device (sysstat).
+tcpdump -i <iface> -n — Capture network packets (requires privileges).
+
+
+Performance & Troubleshooting
+
+free -h — Show memory usage (human readable).
+slabtop — Display kernel slab cache information.
+perf top — Performance profiling (if installed).
+strace -p <pid> — Trace system calls of a process.
+lsof -i :<port> — Show which process uses a network port.
+lsof +D /path — List open files under a directory.
+journalctl --vacuum-time=7d — Remove journal logs older than 7 days.
+
+
+Scheduling & Automation
+
+crontab -e — Edit current user's crontab.
+crontab -l — List current user's cron jobs.
+systemctl list-timers — List systemd timers.
+at 09:00 — Schedule a one-time job with at (if installed).
+
+
+Containers & Virtualization
+
+podman ps -a — List containers (Podman, rootless replacement for Docker on RHEL).
+podman run ... — Run a container with Podman.
+docker ps -a — List Docker containers (if installed).
+virt-install --name vm --memory 2048 ... — Create a VM with libvirt.
+virsh list --all — Manage libvirt VMs.
+virt-manager — GUI for managing virtual machines.
+
+
+Time & Localization
+
+timedatectl — Show or set system time and time zone.
+timedatectl set-timezone <Zone/City> — Set system timezone.
+chronyc tracking — Show chrony time synchronization status.
+hwclock --systohc — Sync hardware clock from system clock.
+
+
+Backup & Recovery
+
+rsync -a --delete <src> <dest> — Incremental backups with rsync.
+tar -cvpf backup.tar /important — Create full filesystem backup preserving permissions.
+dd if=/dev/sdX of=/path/image.img bs=4M — Create block-level disk image (use with caution).
+restore -r -f backup.tar — Restore from tar backup.
+
+
+Development & Build Tools
+
+gcc --version — Show installed GCC version.
+make — Run make build automation.
+git clone <repo> — Clone a Git repository.
+python3 -m venv env — Create Python virtual environment.
+
+
+Miscellaneous Useful Commands
+
+echo $PATH — Show PATH environment variable.
+env — List environment variables.
+export VAR=value — Set environment variable for session.
+alias ll='ls -lah' — Create a shell alias.
+history — Show command history.
+sudo -i — Start a root login shell.
+sudo visudo — Safely edit sudoers file.
+chroot /mnt /bin/bash — Change root for recovery or install.
+whoami — Show current user.
+w — Show who is logged in and what they are doing.
+uptime — Show how long system has been running (duplicate but useful).
